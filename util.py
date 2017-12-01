@@ -71,12 +71,12 @@ class Param(object):
     return self.w_.asarray().__str__()
 
   def Load(self, f, name):
-    if name in f.keys():
+    if name in list(f.keys()):
       self.w_.overwrite(f[name].value)
       self.dw_history_.overwrite(f['%s_grad' % name].value)
       self.t_ = f.attrs.get('%s_t' % name, 0)
     else:
-      print "%s not found." % name
+      print("%s not found." % name)
 
   def Save(self, f, name):
     w_dset = f.create_dataset(name, self.w_.shape, dtype=np.float32)

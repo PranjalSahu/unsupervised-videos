@@ -64,7 +64,7 @@ class DataHandler(object):
     assert len(labels) == len(video_boundaries)
     video_ids = self.GetVideoIds(data_pb.video_ids_file)
     if len(video_ids) == 0:
-      video_ids = range(len(labels))
+      video_ids = list(range(len(labels)))
     
     self.num_frames_ = []
     self.video_ind_ = {}
@@ -75,13 +75,13 @@ class DataHandler(object):
       start, end = video_boundaries[video_id]
       self.num_frames_.append(num_frames[video_id])
       end = end - self.seq_length_ + 1
-      frame_indices.extend(range(start, end, self.seq_stride_))
-      for i in xrange(start, end, self.seq_stride_):
+      frame_indices.extend(list(range(start, end, self.seq_stride_)))
+      for i in range(start, end, self.seq_stride_):
         self.video_ind_[i] = v
     
     self.num_videos_ = len(video_ids)
     self.dataset_size_ = len(frame_indices)
-    print 'Dataset size', self.dataset_size_
+    print('Dataset size', self.dataset_size_)
     self.frame_indices_ = np.array(frame_indices) 
     self.labels_ = np.array(this_labels).reshape(-1, 1)
 
@@ -147,19 +147,19 @@ class DataHandler(object):
 
     crops = np.zeros((num_crops, data.shape[0], self.num_colors_, self.patch_size_y_, self.patch_size_x_))
     seq_length = data.shape[0]
-    for i in xrange(num_crops):
+    for i in range(num_crops):
       crops[i, :, :, :, :] = d[:, :,
              y_offset[i]: y_offset[i] + self.patch_size_y_,
              x_offset[i]: x_offset[i] + self.patch_size_x_]
     if self.mean_ is not None:
-      for i in xrange(self.num_colors_):
+      for i in range(self.num_colors_):
         crops[:, :, i, :, :] -= self.mean_[i]
         crops[:, :, i, :, :] /= self.std_[i]
     return crops.reshape((num_crops, -1))
 
   def GetBatch(self, verbose=False):
     batch_size = self.batch_size_
-    for j in xrange(batch_size):
+    for j in range(batch_size):
       if verbose:
         sys.stdout.write('\r%d of %d' % (j+1, batch_size))
         sys.stdout.flush()
@@ -185,7 +185,7 @@ class DataHandler(object):
     correct = 0
 
     # pooled_pred are averaged results for all selected frames in the video
-    for i in xrange(self.num_videos_):
+    for i in range(self.num_videos_):
       end = start + 1 + max(0, (self.num_frames_[i] - self.seq_length_)/self.seq_stride_)
       correct += (predictions[start:end, :].argmax(axis=1) == self.labels_[i]).sum()
       pooled_pred = predictions[start:end, :].mean(axis=0)
@@ -208,20 +208,20 @@ class DataHandler(object):
       fut_length = f.shape[0] if fut is not None else 0
       plt.figure(2*fig, figsize=(self.seq_length_, 1))
       plt.clf()
-      for i in xrange(self.seq_length_):
-        for j in xrange(self.num_colors_):
+      for i in range(self.seq_length_):
+        for j in range(self.num_colors_):
           im1[:, :, j] = ((d[i, j, :, :] * self.std_[j]) + self.mean_[j]).astype(np.uint8)
         plt.subplot(1, self.seq_length_, i+1)
         plt.imshow(im1, interpolation="nearest")
         plt.axis('off')
         plt.draw()
 
-      print output_file1
+      print(output_file1)
       plt.savefig(output_file1, bbox_inches='tight')
       plt.figure(2*fig+1, figsize=(self.seq_length_, 1))
       plt.clf()
-      for i in xrange(self.seq_length_):
-        for j in xrange(self.num_colors_):
+      for i in range(self.seq_length_):
+        for j in range(self.num_colors_):
           r_i = rec_length - i - 1
           f_i = i - rec_length
           if r_i >= 0: 
@@ -236,19 +236,19 @@ class DataHandler(object):
         plt.imshow(im2, interpolation="nearest")
         plt.axis('off')
         plt.draw()
-      print output_file2
+      print(output_file2)
       plt.savefig(output_file2, bbox_inches='tight')
     else:
-      for i in xrange(self.seq_length_):
+      for i in range(self.seq_length_):
         plt.subplot(1, self.seq_length_, i+1)
-        for j in xrange(self.num_colors_):
+        for j in range(self.num_colors_):
           im[:, :, j] = d[i, j, :, :].astype(np.uint8)
         plt.imshow(im)
       plt.draw()
       if output_file is None:
         plt.pause(0.1)
       else:
-        print output_file
+        print(output_file)
         plt.savefig(output_file, bbox_inches='tight')
 
 class UnlabelledDataHandler(object):
@@ -271,13 +271,13 @@ class UnlabelledDataHandler(object):
       num_f.append(int(line.strip()))
     assert len(num_f) == len(fnames)
 
-    for i in xrange(len(num_f)):
+    for i in range(len(num_f)):
       if num_f[i] >= self.seq_length_:
         self.num_frames_.append(num_f[i])
         self.filenames_.append(fnames[i])
 
     self.num_videos_ = len(self.filenames_)
-    print 'Num videos', self.num_videos_
+    print('Num videos', self.num_videos_)
     data = h5py.File(self.filenames_[0])[data_pb.dataset_name]
     self.frame_size_ = data.shape[1]
     self.dataset_name_ = data_pb.dataset_name
@@ -287,12 +287,12 @@ class UnlabelledDataHandler(object):
     self.video_ind_ = {}
     for v, f in enumerate(self.num_frames_):
       end = start + f - self.seq_length_ + 1
-      frame_indices.extend(range(start, end, self.seq_stride_))
-      for i in xrange(start, end, self.seq_stride_):
+      frame_indices.extend(list(range(start, end, self.seq_stride_)))
+      for i in range(start, end, self.seq_stride_):
         self.video_ind_[i] = v
       start += f
     self.dataset_size_ = len(frame_indices)
-    print 'Dataset size', self.dataset_size_
+    print('Dataset size', self.dataset_size_)
     self.frame_indices_ = np.array(frame_indices) 
     self.vid_boundary_ = np.array(self.num_frames_).cumsum()
     self.Reset()
@@ -317,7 +317,7 @@ class UnlabelledDataHandler(object):
 
   def GetBatch(self, verbose=False):
     batch_size = self.batch_size_
-    for j in xrange(batch_size):
+    for j in range(batch_size):
       start = self.frame_indices_[self.frame_row_]
       vid_ind = self.video_ind_[start]
       if vid_ind > 0:
@@ -346,7 +346,7 @@ class BouncingMNISTDataHandler(object):
     try:
       f = h5py.File('/ais/gobi3/u/nitish/mnist/mnist.h5')
     except:
-      print 'Please set the correct path to MNIST dataset'
+      print('Please set the correct path to MNIST dataset')
       sys.exit()
 
     self.data_ = f['train'].value.reshape(-1, 28, 28)
@@ -385,13 +385,13 @@ class BouncingMNISTDataHandler(object):
 
     start_y = np.zeros((length, batch_size))
     start_x = np.zeros((length, batch_size))
-    for i in xrange(length):
+    for i in range(length):
       # Take a step along velocity.
       y += v_y * self.step_length_
       x += v_x * self.step_length_
 
       # Bounce off edges.
-      for j in xrange(batch_size):
+      for j in range(batch_size):
         if x[j] <= 0:
           x[j] = 0
           v_x[j] = -v_x[j]
@@ -423,8 +423,8 @@ class BouncingMNISTDataHandler(object):
     # minibatch data
     data = np.zeros((self.batch_size_, self.seq_length_, self.image_size_, self.image_size_), dtype=np.float32)
     
-    for j in xrange(self.batch_size_):
-      for n in xrange(self.num_digits_):
+    for j in range(self.batch_size_):
+      for n in range(self.num_digits_):
        
         # get random digit from dataset
         ind = self.indices_[self.row_]
@@ -435,7 +435,7 @@ class BouncingMNISTDataHandler(object):
         digit_image = self.data_[ind, :, :]
         
         # generate video
-        for i in xrange(self.seq_length_):
+        for i in range(self.seq_length_):
           top    = start_y[i, j * self.num_digits_ + n]
           left   = start_x[i, j * self.num_digits_ + n]
           bottom = top  + self.digit_size_
@@ -470,19 +470,19 @@ class BouncingMNISTDataHandler(object):
     # create figure for original sequence
     plt.figure(2*fig, figsize=(20, 1))
     plt.clf()
-    for i in xrange(self.seq_length_):
+    for i in range(self.seq_length_):
       plt.subplot(num_rows, self.seq_length_, i+1)
       plt.imshow(data[i, :, :], cmap=plt.cm.gray, interpolation="nearest")
       plt.axis('off')
     plt.draw()
     if output_file1 is not None:
-      print output_file1
+      print(output_file1)
       plt.savefig(output_file1, bbox_inches='tight')
 
     # create figure for reconstuction and future sequences
     plt.figure(2*fig+1, figsize=(20, 1))
     plt.clf()
-    for i in xrange(self.seq_length_):
+    for i in range(self.seq_length_):
       if rec is not None and i < enc_seq_length:
         plt.subplot(num_rows, self.seq_length_, i + 1)
         plt.imshow(rec[rec.shape[0] - i - 1, :, :], cmap=plt.cm.gray, interpolation="nearest")
@@ -492,7 +492,7 @@ class BouncingMNISTDataHandler(object):
       plt.axis('off')
     plt.draw()
     if output_file2 is not None:
-      print output_file2
+      print(output_file2)
       plt.savefig(output_file2, bbox_inches='tight')
     else:
       plt.pause(0.1)
@@ -520,7 +520,7 @@ class VideoPatchDataHandler(object):
       self.data_ = np.float32(np.load(self.data_file_))
       self.data_ = self.data_ / 255.  
     except:
-      print 'Please set the correct path to the dataset'
+      print('Please set the correct path to the dataset')
       sys.exit()
 
     self.dataset_size_ = self.data_.shape[0]
@@ -600,7 +600,7 @@ class VideoPatchDataHandler(object):
     # create figure for original sequence
     plt.figure(2*fig, figsize=(self.num_frames_, 1))
     plt.clf()
-    for i in xrange(self.seq_length_):
+    for i in range(self.seq_length_):
       plt.subplot(num_rows, self.seq_length_, i+1)
       if self.is_color_:
         plt.imshow(data[i])
@@ -609,13 +609,13 @@ class VideoPatchDataHandler(object):
       plt.axis('off')
     plt.draw()
     if output_file1 is not None:
-      print output_file1
+      print(output_file1)
       plt.savefig(output_file1, bbox_inches='tight')
 
     # create figure for reconstuction and future sequences
     plt.figure(2*fig+1, figsize=(self.num_frames_, 1))
     plt.clf()
-    for i in xrange(self.seq_length_):
+    for i in range(self.seq_length_):
       if rec is not None and i < enc_seq_length:
         plt.subplot(num_rows, self.seq_length_, i + 1)
         if self.is_color_:
@@ -631,7 +631,7 @@ class VideoPatchDataHandler(object):
       plt.axis('off')
     plt.draw()
     if output_file2 is not None:
-      print output_file2
+      print(output_file2)
       plt.savefig(output_file2, bbox_inches='tight')
     else:
       plt.pause(0.1)

@@ -4,16 +4,17 @@ from util import *
 import sys
 
 def ChooseDataHandler(data_pb):
-  if data_pb.dataset_type == config_pb2.Data.LABELLED:
-    return DataHandler(data_pb)
-  elif data_pb.dataset_type == config_pb2.Data.UNLABELLED:
-    return UnlabelledDataHandler(data_pb)
-  elif data_pb.dataset_type == config_pb2.Data.BOUNCING_MNIST:
     return BouncingMNISTDataHandler(data_pb)
-  elif data_pb.dataset_type == config_pb2.Data.VIDEO_PATCH:
-    return VideoPatchDataHandler(data_pb)
-  else:
-    raise Exception('Unknown DatasetType.')
+#   if data_pb.dataset_type == config_pb2.Data.LABELLED:
+#     return DataHandler(data_pb)
+#   elif data_pb.dataset_type == config_pb2.Data.UNLABELLED:
+#     return UnlabelledDataHandler(data_pb)
+#   elif data_pb.dataset_type == config_pb2.Data.BOUNCING_MNIST:
+#        return BouncingMNISTDataHandler(data_pb)
+#   elif data_pb.dataset_type == config_pb2.Data.VIDEO_PATCH:
+#     return VideoPatchDataHandler(data_pb)
+#   else:
+#     raise Exception('Unknown DatasetType.')
 
 class DataHandler(object):
   """Handling labelled datasets. 
@@ -334,22 +335,23 @@ class UnlabelledDataHandler(object):
 class BouncingMNISTDataHandler(object):
   """Data Handler that creates Bouncing MNIST dataset on the fly."""
   def __init__(self, data_pb):
-    self.seq_length_ = data_pb.num_frames
-    self.batch_size_ = data_pb.batch_size
-    self.image_size_ = data_pb.image_size
-    self.num_digits_ = data_pb.num_digits
-    self.step_length_ = data_pb.step_length
+    self.seq_length_ = data_pb[0]#num_frames
+    self.batch_size_ = data_pb[1]#batch_size
+    self.image_size_ = data_pb[2]#.image_size
+    self.num_digits_ = data_pb[3]#.num_digits
+    self.step_length_ = data_pb[4]#.step_length
     self.dataset_size_ = 10000  # The dataset is really infinite. This is just for validation.
     self.digit_size_ = 28
     self.frame_size_ = self.image_size_ ** 2
 
     try:
-      f = h5py.File('/ais/gobi3/u/nitish/mnist/mnist.h5')
+      f = h5py.File('./datasets/mnist.h5')
     except:
       print('Please set the correct path to MNIST dataset')
       sys.exit()
 
     self.data_ = f['train'].value.reshape(-1, 28, 28)
+    print('SHAPE OF data is ', self.data_.shape)
     f.close()
     self.indices_ = np.arange(self.data_.shape[0])
     self.row_ = 0

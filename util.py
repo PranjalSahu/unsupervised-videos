@@ -1,8 +1,6 @@
 import sys
 
-import cudamat as cm
-from cudamat import cudamat_conv_gemm as cc
-from cudamat import gpu_lock2 as gpu_lock
+
 import h5py
 
 import os
@@ -13,7 +11,6 @@ from time import sleep
 import pdb
 import datetime
 import time
-import config_pb2
 from google.protobuf import text_format
 from random import randint
 

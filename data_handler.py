@@ -349,7 +349,7 @@ class BouncingMNISTDataHandler(object):
     except:
       print('Please set the correct path to MNIST dataset')
       sys.exit()
-
+    print('VALUE IS ', f['train'])
     self.data_ = f['train'].value.reshape(-1, 28, 28)
     print('SHAPE OF data is ', self.data_.shape)
     f.close()
@@ -424,7 +424,7 @@ class BouncingMNISTDataHandler(object):
     
     # minibatch data
     data = np.zeros((self.batch_size_, self.seq_length_, self.image_size_, self.image_size_), dtype=np.float32)
-    
+    print('Get Batch inside the bounding', self.seq_length_)
     for j in range(self.batch_size_):
       for n in range(self.num_digits_):
        
